@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,45 +10,39 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    }
-});
+// Resend Client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-app.post('/send-email', (req, res) => {
+// Send Email Route
+app.post('/send-email', async (req, res) => {
     const { name, email, message } = req.body;
 
     if (!name || !email || !message) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
-    const mailOptions = {
-        from: process.env.SMTP_USER,
-        to: process.env.SMTP_USER,
-        subject: `New Contact Form Submission from ${name}`,
-        html: `
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Message:</strong></p>
-            <p>${message}</p>
-        `,
-        replyTo: email
-    };
+    try {
+        const emailResponse = await resend.emails.send({
+            from: 'HR <hr@navabharathtechnologies.com>',
+            to: 'hr@navabharathtechnologies.com',
+            subject: `New Contact Form Submission from ${name}`,
+            html: `
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Message:</strong></p>
+                <p>${message}</p>
+            `,
+        });
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error("❌ Email Send Error:", error);
-            return res.status(500).json({ success: false, message: 'Failed to send email.' });
-        }
-
-        console.log("✔ Email Sent:", info.response);
+        console.log("✔ Email sent:", emailResponse);
         res.status(200).json({ success: true, message: 'Email sent successfully!' });
-    });
+
+    } catch (error) {
+        console.error("❌ Error sending email:", error);
+        res.status(500).json({ success: false, message: 'Failed to send email.' });
+    }
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
