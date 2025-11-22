@@ -6,23 +6,20 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// GoDaddy SMTP Transporter
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,     
-    port: process.env.SMTP_PORT,     
-    secure: true,                    
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
-        user: process.env.SMTP_USER, 
-        pass: process.env.SMTP_PASS  
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
     }
 });
 
-// Send Email Route
 app.post('/send-email', (req, res) => {
     const { name, email, message } = req.body;
 
@@ -54,7 +51,4 @@ app.post('/send-email', (req, res) => {
     });
 });
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
