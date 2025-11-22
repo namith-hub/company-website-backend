@@ -4,25 +4,25 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // FIXED HERE
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Email Configuration (Gmail SMTP)
+// GoDaddy SMTP Transporter
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    host: process.env.SMTP_HOST,     
+    port: process.env.SMTP_PORT,     
+    secure: true,                    
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.SMTP_USER, 
+        pass: process.env.SMTP_PASS  
     }
 });
 
-// Route to handle form submission
+// Send Email Route
 app.post('/send-email', (req, res) => {
     const { name, email, message } = req.body;
 
@@ -31,8 +31,8 @@ app.post('/send-email', (req, res) => {
     }
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER,
+        from: process.env.SMTP_USER,
+        to: process.env.SMTP_USER,
         subject: `New Contact Form Submission from ${name}`,
         html: `
             <p><strong>Name:</strong> ${name}</p>
@@ -45,13 +45,16 @@ app.post('/send-email', (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-            console.error('Error sending email:', error);
+            console.error("❌ Email Send Error:", error);
             return res.status(500).json({ success: false, message: 'Failed to send email.' });
         }
+
+        console.log("✔ Email Sent:", info.response);
         res.status(200).json({ success: true, message: 'Email sent successfully!' });
     });
 });
 
+// Start Server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
