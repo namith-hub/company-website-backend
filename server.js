@@ -4,20 +4,21 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // FIXED HERE
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Email Configuration
-// IMPORTANT: Replace these with actual credentials or use environment variables
+// Email Configuration (Gmail SMTP)
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Or your preferred email service
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
-        user: 'hr@navabharathtechnologies.com', // REPLACE WITH YOUR EMAIL
-        pass: 'vycrzwtbmlpieazo'     // REPLACE WITH YOUR APP PASSWORD
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
@@ -25,21 +26,19 @@ const transporter = nodemailer.createTransport({
 app.post('/send-email', (req, res) => {
     const { name, email, message } = req.body;
 
-    // Server-side validation
     if (!name || !email || !message) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
     const mailOptions = {
-        from: email, // Sender address (from the form)
-        to: 'hr@navabharathtechnologies.com', // Recipient
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
         subject: `New Contact Form Submission from ${name}`,
-        text: `
-            Name: ${name}
-            Email: ${email}
-            
-            Message:
-            ${message}
+        html: `
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
         `,
         replyTo: email
     };
@@ -49,11 +48,10 @@ app.post('/send-email', (req, res) => {
             console.error('Error sending email:', error);
             return res.status(500).json({ success: false, message: 'Failed to send email.' });
         }
-        console.log('Email sent:', info.response);
         res.status(200).json({ success: true, message: 'Email sent successfully!' });
     });
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
