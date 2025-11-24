@@ -22,7 +22,7 @@ app.post('/send-email', async (req, res) => {
 
     try {
         const data = await resend.emails.send({
-            from: "NBTech <onboarding@resend.dev>",   // 👈 Works without domain verification
+            from: "NBTech <hr@navabharathtechnologies.com>",
             to: "hr@navabharathtechnologies.com",
             subject: `New Test Contact from ${name}`,
             html: `
@@ -43,3 +43,4 @@ app.post('/send-email', async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
