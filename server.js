@@ -22,9 +22,9 @@ app.post('/send-email', async (req, res) => {
 
     try {
         const data = await resend.emails.send({
-            from: "HR <hr@navabharathtechnologies.com>",
+            from: "NBTech <onboarding@resend.dev>",   // 👈 Works without domain verification
             to: "hr@navabharathtechnologies.com",
-            subject: `New Contact Form from ${name}`,
+            subject: `New Test Contact from ${name}`,
             html: `
                 <p><strong>Name:</strong> ${name}</p>
                 <p><strong>Email:</strong> ${email}</p>
