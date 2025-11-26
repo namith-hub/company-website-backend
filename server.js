@@ -27,7 +27,7 @@ app.post('/send-email', async (req, res) => {
     try {
         const emailData = await resend.emails.send({
             from: "NBTech <no-reply@updates.navabharathtechnologies.com>",
-            to: "hr@navabharathtechnologies.com",
+            to: "contact@navabharathtechnologies.com",
             subject: `New Contact Form Submission from ${name}`,
             html: `
                 <h2>New Contact Form Message</h2>
@@ -59,3 +59,4 @@ app.post('/send-email', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
